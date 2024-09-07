@@ -1,0 +1,105 @@
+
+services:
+
+  longwriter-backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: longwriter_backend
+    image: longwriter_backend
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    ports:
+      - ${BACKEND_PORT}:8000
+    volumes:
+      - ./backend:/app
+      - ./model_cache:/app/model_cache
+    env_file:
+      - .env
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    networks:
+      - longwriter_app_network
+
+  longwriter-backend-two:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: longwriter_backend_two
+    image: longwriter_backend_two
+    command: ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+    
+    volumes:
+      - ./backend:/app
+      - ./model_cache:/app/model_cache
+    env_file:
+      - .env
+    ipc: host
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [gpu]
+    networks:
+      - longwriter_app_network
+
+  longwriter-frontend:
+    build:
+      context: ./react-frontend
+      dockerfile: Dockerfile
+    container_name: longwriter_frontend
+    image: longwriter_frontend
+    command: "npm run dev -- --host"
+    env_file:
+      - .env
+    ports:
+      - "${REACT_FRONTEND_PORT}:5173"
+    volumes:
+      - ./react-frontend/src:/app/src
+      - ./react-frontend/public:/app/public
+      - ./react-frontend/services:/app/services
+      - ./react-frontend/vite.config.js:/app/vite.config.js
+      - ./react-frontend/.eslintrc.cjs:/app/.eslintrc.cjs
+    networks:
+      - longwriter_app_network
+    restart: always
+  
+  portainer:
+    image: portainer/portainer-ce:latest
+    container_name: portainer
+    command: -H unix:///var/run/docker.sock
+    env_file:
+      - .env
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - "${PORTAINER_PORT}:9000"
+    networks:
+      - longwriter_app_network
+
+  nginx-proxy-manager:
+    image: jc21/nginx-proxy-manager:latest
+    container_name: nginx_proxy_manager
+    restart: always
+    ports:
+      - "80:80"
+      - "81:81"
+      - "443:443"
+    environment:
+      DB_SQLITE_FILE: "/data/database.sqlite"
+    volumes:
+      - ./nginx-proxy-manager/data:/data
+      - ./nginx-proxy-manager/letsencrypt:/etc/letsencrypt
+    networks:
+      - longwriter_app_network
+
+volumes:
+  portainer_data:
+
+networks:
+  longwriter_app_network:
+    driver: bridge
