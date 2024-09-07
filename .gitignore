@@ -3,3 +3,7 @@
 *.idea/
 dataset
 backend/model_cache
+react-frontend/node_modules
+react-frontend/build
+react-frontend/.env
+react-frontend/.env.local
