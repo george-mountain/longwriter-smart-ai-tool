@@ -37,6 +37,9 @@ To run LongWriter using Docker Compose and Docker, follow these steps:
   docker compose up
   ```
 
-5. Access LongWriter in your web browser at `http://localhost:8000`.
+5. Access LongWriter in your web browser at `http://localhost:5173`.
+
+6. Access api docs via `http://localhost:8000/docs`
+
 
 
