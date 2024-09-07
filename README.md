@@ -24,6 +24,24 @@ To run LongWriter using Docker Compose and Docker, follow these steps:
   ```shell
   cd longwriter-smart-ai-tool
   ```
+Create a .env file in your project root directory and fill your configurations.
+Example:
+```shell
+
+
+
+# MICROSERVICES PORTS
+BACKEND_PORT=8000
+
+# MICROSERVICES URL
+FRONTEND_URL=http://127.0.0.1:5173
+HOST_IP=<your server ip address>
+VITE_API_BASE_URL=http://${HOST_IP}:${BACKEND_PORT}
+REDIS_URL=redis://redis_server:${REDIS_PORT}
+
+
+
+```
 
 3. Build the Docker image:
 
